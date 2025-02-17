@@ -1,0 +1,46 @@
+.App {
+  min-width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 5rem;
+  background-color: azure;
+  gap: 2rem;
+}
+
+.App p {
+  color: black;
+}
+
+.App button {
+  width: 200px;
+  max-width: 10rem;
+  font-size: 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+/* 📱 Para pantallas de 768px o menos (Tablets y móviles) */
+@media screen and (max-width: 768px) {
+  .App {
+    flex-direction: column; /* Cambia de fila a columna */
+    font-size: 3rem; /* Reduce el tamaño de fuente */
+  }
+
+  .App button {
+    width: 100%; /* Ocupa todo el ancho disponible */
+    font-size: 1.5rem; /* Reduce el tamaño del texto */
+  }
+}
+
+/* 📱 Para móviles pequeños (480px o menos) */
+@media screen and (max-width: 480px) {
+  .App {
+    font-size: 2rem; /* Reduce aún más el tamaño */
+  }
+
+  .App button {
+    font-size: 1.2rem;
+  }
+}
