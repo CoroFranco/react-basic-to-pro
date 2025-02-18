@@ -1,4 +1,4 @@
-export default function Nav () {
+export default function Sidebar () {
   return (
     <aside className='flex gap-6 p-6 flex-col bg-gray-800 text-white w-64'>
         <h2 className='font-bold text-2xl'>Task-nimi</h2>
