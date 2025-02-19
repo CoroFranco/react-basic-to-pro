@@ -1,0 +1,9 @@
+.options-header {
+  display: flex;
+}
+
+.quiz {
+  display: grid;
+  place-content: center;
+  width: 100%;
+}
