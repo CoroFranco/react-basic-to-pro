@@ -1,9 +1,46 @@
+@import 'tailwindcss';
+
 .options-header {
   display: flex;
+  justify-content: center;
 }
 
 .quiz {
   display: grid;
   place-content: center;
   width: 100%;
+}
+
+.responseForm {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  ul {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: gray;
+    margin: 0;
+  }
+}
+
+.list {
+  list-style: none;
+  padding: 2px;
+  font-size: 20px;
+}
+
+.list:hover {
+  background-color: gainsboro;
+  color: black;
+  cursor: pointer;
+}
+
+input {
+  background-color: gray;
+  color: wheat;
+  padding: 5px;
+  font-weight: 400;
+  font-size: 20px;
 }
