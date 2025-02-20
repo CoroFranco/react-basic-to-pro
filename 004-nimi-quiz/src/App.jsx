@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import './app.css'
 
-const randomePage = Math.floor(Math.random() * 10)
-const RANDOM_ANIME_URL = `https://api.jikan.moe/v4/top/anime?page=${randomePage}&limit=10&filter=bypopularity&type=tv`
+const randomePage = Math.ceil(Math.random() * 10)
+console.log(randomePage)
+const RANDOM_ANIME_URL = `https://api.jikan.moe/v4/top/anime?page=${randomePage}&limit=25&filter=bypopularity&type=tv`
 const ANIME_TITLE_SEARCH = `https://api.jikan.moe/v4/anime?page=1&limit=6&filter=bypopularity&type=tv&q=`
 
 export default function App() {
-  const [blur, setBlur] = useState(20)
+  const [blur, setBlur] = useState(0)
   const [image, setImage] = useState(null)
   const [titles, setTitles] = useState([])
   const [inputTitle, setInputTitle] = useState("")
   const [correctTitle, setCorrectTitle] = useState("")
   const [incorrectTitles, setIncorrectTitles] = useState([])
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [showOptions, setShowOptions] = useState(false);
   const debounceRef = useRef(null)
 
   useEffect(() => {
@@ -22,7 +25,7 @@ export default function App() {
     const response = await fetch(RANDOM_ANIME_URL)
     const data = await response.json()
     const popularAnimes = data.data
-    const randomAnime = popularAnimes[Math.floor(Math.random() * popularAnimes.length)]
+    const randomAnime = popularAnimes[Math.ceil(Math.random() * 25)]
     setImage(randomAnime.images.webp.large_image_url)
     setCorrectTitle(randomAnime.titles[0].title)
   }
@@ -58,13 +61,44 @@ export default function App() {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }
-    if (correctTitle === newTitle) return
     setInputTitle(newTitle)
-
+    setSelectedIndex(-1)
     debounceRef.current = setTimeout(() => {
       fetchAnimeTitles(newTitle)
     }, 500)
   }
+
+
+
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      setSelectedIndex((prev) => (prev < titles.length - 1 ? prev + 1 : prev));
+    } else if (e.key === "ArrowUp") {
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+    } else if (e.key === "Enter") {
+
+      if (selectedIndex >= 0) {
+        const selectedTitle = titles[selectedIndex];
+        setInputTitle(selectedTitle);
+        setShowOptions(false);
+  
+        if (selectedTitle === correctTitle) {
+          setBlur(0);
+        }
+      }
+    } else if(e.key === 'Escape') {
+      setShowOptions(false);
+    }
+  };
+  
+  const handleOption = (title) => {
+    setInputTitle(title);
+    setShowOptions(false);
+  
+    if (title === correctTitle) {
+      setBlur(0);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 py-8 px-4 sm:px-6 lg:px-8 text-gray-100">
@@ -102,9 +136,15 @@ export default function App() {
           <div className="flex justify-center space-x-4">
             <input
               type="text"
+              list="opciones"
               value={inputTitle}
-              onChange={handleChange}
-              className="shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-64 sm:text-sm bg-gray-800 border-gray-700 text-gray-300 rounded-md"
+              onChange={(e) => {
+                handleChange(e);
+                setShowOptions(true);
+              }}
+              disabled={correctTitle === inputTitle && inputTitle !== '' }
+              onKeyDown={handleKeyDown}
+              className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-64 sm:text-sm bg-gray-800 border-gray-700 text-gray-300 rounded-md ` }
               placeholder="Enter anime title"
             />
             <button
@@ -114,24 +154,35 @@ export default function App() {
               Enviar
             </button>
           </div>
-          <ul className="bg-gray-800 shadow overflow-hidden rounded-md max-w-md mx-auto">
-            {titles.map((title, index) => (
+          {showOptions && inputTitle && (
+        <ul className="absolute w-full bg-gray-800 border border-gray-700 rounded-md mt-1 shadow-lg z-10">
+          {titles.length > 0 ? (
+            titles.map((title, index) => (
               <li
-                key={index}
-                onClick={() => setInputTitle(title)}
-                className="px-6 py-4 cursor-pointer hover:bg-gray-700 text-gray-300"
+                key={title}
+                onClick={() => {
+                  handleOption(title);
+                  setShowOptions(false); // Ocultar después de seleccionar
+                }}
+                className={`px-4 py-2 cursor-pointer ${
+                  selectedIndex === index ? "bg-purple-600 text-white" : "text-gray-300"
+                }  ${incorrectTitles.includes(title) ? 'bg-red-600' : 'hover:bg-purple-500'}`}
               >
                 {title}
               </li>
-            ))}
-          </ul>
+            ))
+          ) : (
+            <li className="px-4 py-2 text-gray-500">No results found</li>
+          )}
+        </ul>
+      )}
         </form>
             
           </div>
         </section>
-        <div className="w-1/4">
+        <div className="text-center">
               {inputTitle=== correctTitle && (
-                <h3 className="text-green-400 font-semibold">{correctTitle}</h3>
+                <h3 className="text-green-400 font-bold text-2xl">{correctTitle}</h3>
               )}
             </div>
       </main>
