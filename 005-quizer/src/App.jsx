@@ -1,5 +1,6 @@
 import { useReducer } from "react";
 import "./App.css";
+import Question from "./assets/components/Question";
 
 const initialState = {
   questions: [
@@ -30,10 +31,20 @@ const initialState = {
 
 function quizReducer(state, action) {
   switch (action.type) {
-    case "NEXT":
-      if(state.currentQuestionIndex === 3) return {...state}
-      return { ...state, currentQuestionIndex: state.currentQuestionIndex + 1 };
-
+    case "QUIZ_START":
+      return {...state, quizStarted: true}
+    case "ANSWER_QUESTION":
+      const currentQuestion = state.questions[state.currentQuestionIndex]
+      const isCorrect = action.payload === currentQuestion.correctAnswer
+      return {
+        ...state,
+        score: isCorrect ? state.score + 1 : state.score
+      }
+      case "NEXT_QUESTION":
+        const nextQuestion = state.currentQuestionIndex + 1
+        return {...state, currentQuestionIndex: nextQuestion, quizFinished: nextQuestion >= 3}
+      
+        
     default:
       return state;
   }
@@ -41,11 +52,36 @@ function quizReducer(state, action) {
 
 function App() {
   const [state, dispatch] = useReducer(quizReducer, initialState);
+
+  const handleClick = (selectedAnswer) => {
+    dispatch({type: "ANSWER_QUESTION", payload: selectedAnswer})
+    dispatch({type: 'NEXT_QUESTION'})
+  }
   console.log(state)
   return (
     <>
-      <button onClick={() => dispatch({ type: "NEXT" })}>Actualizar ID</button>
-      <div>ID de la primera pregunta: {state.questions[0].id}</div>
+      {
+        !state.quizStarted && 
+          <button onClick={() => dispatch({type: "QUIZ_START"})}>
+            iniciar
+          </button>
+}
+{
+        state.questions.map((question, id) => {
+          if(id === state.currentQuestionIndex && state.quizStarted){
+            return(
+              <Question key={id} question={question} onClick={handleClick} />
+
+            )
+          }
+        })
+      }
+      {
+                state.quizFinished && 
+                <button onClick={() => dispatch({type: "QUIZ_START"})}>
+                  {state.score}
+                </button>
+      }
     </>
   );
 }
