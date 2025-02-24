@@ -43,8 +43,8 @@ function quizReducer(state, action) {
       case "NEXT_QUESTION":
         const nextQuestion = state.currentQuestionIndex + 1
         return {...state, currentQuestionIndex: nextQuestion, quizFinished: nextQuestion >= 3}
-      
-        
+      case "RESTART":
+        return{...initialState}    
     default:
       return state;
   }
@@ -78,7 +78,7 @@ function App() {
       }
       {
                 state.quizFinished && 
-                <button onClick={() => dispatch({type: "QUIZ_START"})}>
+                <button onClick={() => dispatch({type: "RESTART"})}>
                   {state.score}
                 </button>
       }
