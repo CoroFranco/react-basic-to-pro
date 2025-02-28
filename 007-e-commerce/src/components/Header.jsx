@@ -4,21 +4,23 @@ export default function Header ({dark, handleDarkMode, handleCart}) {
   const {filters, setFilters} = useFilters()
 
   const handleChange = (e) => {
-    const newTitle = e.target.value
+    const {name, value} = e.target
     setFilters(prevFilters => ({
       ...prevFilters, 
-      title: newTitle
+      [name]: value
     }));
-    console.log(newTitle)
   }
+
   
   return (
     <header className='flex justify-between w-full mx-auto py-[15px] px-[40px] sticky top-0 z-40 backdrop-blur-sm bg-black/10 bg-opacity '>
       <h1 className='text-2xl font-bold'>NimiStore</h1>
+      <input onChange={handleChange} type="range" value={filters.price} name="price" min={0} max={1000}/>
+      <span>${filters.price}</span>
       <div className='relative flex  gap-5'>
         <div>
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground text-white "><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-        <input value={filters.title} onChange={handleChange} className="dark:placeholder-white text-white flex h-10 w-full rounded-md  px-3 py-2 text-sm  pl-8 md:w-[300px] lg:w-[500px] bg-gray-800" placeholder="Search products..." type="search" />
+        <input value={filters.title} name="title" onChange={handleChange} className="dark:placeholder-white text-white flex h-10 w-full rounded-md  px-3 py-2 text-sm  pl-8 md:w-[300px] lg:w-[500px] bg-gray-800" placeholder="Search products..." type="search" />
         </div>
       <div className='flex gap-5'>
         <button onClick={handleDarkMode} className='cursor-pointer'>

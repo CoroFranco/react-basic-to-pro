@@ -8,5 +8,5 @@ export default function useCart() {
     throw new Error("useCart debe usarse dentro de un CartProvider");
   }
 
-  return context; // Devuelve todo el contexto (cart, addToCart, removeFromCart, clearCart)
+  return context;
 }

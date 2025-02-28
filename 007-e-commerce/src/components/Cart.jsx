@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import useCart from '../hooks/useCart'
 
 export default function Cart({closeCart}) {
-    const {cart} = useCart()
+    const {cart, removeFromCart, addOneProduct, removeOneProduct} = useCart()
     
     return (
         <motion.div 
@@ -46,10 +46,14 @@ export default function Cart({closeCart}) {
                                     ${product.price}
                                 </p>
                             </div>
-
+                            <div>
+                                <button className='text-black' onClick={()=>removeFromCart(product.title)}> Quitar </button>
+                            </div>
                           </div>
                         <div>
+                          <button onClick={() => removeOneProduct(product.title)} className='text-black'>-</button>
                           <span className='text-black'>{product.quantity}</span>
+                          <button onClick={() => addOneProduct(product.title)} className='text-black'>+</button>
                         </div>
                             
                         </li>
@@ -59,7 +63,7 @@ export default function Cart({closeCart}) {
                 <footer className="border-t p-4 bg-gray-50 sticky bottom-0">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-sm text-gray-600">Total</span>
-                        <span className="text-lg font-bold">
+                        <span className="text-lg text-black font-bold">
                             ${cart.reduce((total, item) => total + item.price, 0).toFixed(2)}
                         </span>
                     </div>
