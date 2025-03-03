@@ -1,0 +1,14 @@
+---
+import { getCollection } from "astro:content";
+import Base from "@layouts/Base.astro";
+import Products from "@layouts/Products.astro";
+const products = (await getCollection('products')).sort((a,b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+const frontmatter = {
+  title: "Products"
+}
+---
+
+<Base frontmatter={frontmatter}> 
+  <Products products={products} />
+</Base>
+

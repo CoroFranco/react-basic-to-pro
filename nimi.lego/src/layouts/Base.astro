@@ -1,0 +1,21 @@
+---
+import Header from "../components/Header"
+import "../styles/globals.css"
+const {frontmatter} = Astro.props
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{frontmatter.title}</title>
+</head>
+<body>
+  <Header title={frontmatter.title} />
+  <main class="">
+    <slot />
+  </main>
+
+</body>
+</html>
