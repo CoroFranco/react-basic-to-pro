@@ -12,6 +12,7 @@ import ShoppingCartProvider from '../../Contexts'
 const AppRoutes = () => {
   const routes = useRoutes([
     { path: '/', element: <Home /> },
+    { path: '/:category', element: <Home /> },
     { path: '/my-account', element: <MyAccount /> },
     { path: '/my-order', element: <MyOrder /> },
     { path: '/my-orders/last', element: <MyOrder /> },
@@ -32,7 +33,6 @@ function App () {
         <AppRoutes />
       </BrowserRouter>
     </ShoppingCartProvider>
-
   )
 }
 

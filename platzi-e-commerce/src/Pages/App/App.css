@@ -24,3 +24,8 @@
 .scroll-container::-webkit-scrollbar-thumb:hover {
   background-color: #555; /* Color del pulgar al pasar el cursor */
 }
+
+
+button {
+  cursor: pointer;
+}

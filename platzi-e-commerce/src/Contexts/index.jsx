@@ -11,6 +11,8 @@ export default function ShoppingCartProvider ({ children }) {
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
   const [searchByTitle, setSearchByTitle] = useState(null)
+  const [category, setCategory] = useState('All')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -21,18 +23,32 @@ export default function ShoppingCartProvider ({ children }) {
     fetchProducts()
   }, [])
 
-  const filterProducts = useCallback((products, search) => {
-    if (!search || search === '') {
+  const filterProducts = useCallback((products, search, category) => {
+    if ((!search || search === '') && category === 'All') {
       return products
     }
+    if (category !== 'All' && (!search || search === '')) {
+      return products.filter(product =>
+        product.category.name.toLowerCase().includes(category))
+    }
+    if (category === 'All') {
+      return products.filter(product =>
+        product.title.toLowerCase().includes(search.toLowerCase()))
+    }
     return products.filter(product =>
-      product.title.toLowerCase().includes(search.toLowerCase())
+      product.title.toLowerCase().includes(search.toLowerCase()) &&
+      product.category.name.toLowerCase().includes(category)
     )
-  }, [])
+  }, [category])
 
   useEffect(() => {
-    const filtered = filterProducts(products, searchByTitle)
+    const filtered = filterProducts(products, searchByTitle, category)
     setFilteredProducts(filtered)
+    const timeout = setTimeout(() => {
+      setLoading(false)
+    }, 2000)
+
+    return () => clearTimeout(timeout)
   }, [products, searchByTitle, filterProducts])
 
   const addToCart = (e, product) => {
@@ -89,7 +105,9 @@ export default function ShoppingCartProvider ({ children }) {
       products,
       searchByTitle,
       setSearchByTitle,
-      filteredProducts
+      filteredProducts,
+      setCategory,
+      loading
     }}
     >
       {children}
