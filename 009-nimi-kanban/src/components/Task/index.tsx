@@ -1,24 +1,44 @@
-import { useSortable } from "@dnd-kit/sortable";
-import { TaskType } from "../Board";
-import { CSS } from '@dnd-kit/utilities';
+import type React from "react"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { TaskType } from "../Board"
+  
 
 interface TaskProps {
   task: TaskType
+  isDragging?: boolean
 }
 
-export default function Task ({task}: TaskProps){
+const Task: React.FC<TaskProps> = ({ task, isDragging = false }) => {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: task.id });
+    isDragging: isSortableDragging,
+  } = useSortable({
+    id: task.id,
+    data: {
+      type: "task",
+      task,
+    },
+  })
 
+  // Mejoramos los estilos para una mejor experiencia visual
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-  };
+    transition: transition || "transform 200ms ease, opacity 200ms ease",
+    opacity: isSortableDragging ? 0.2 : 1, // Cambiamos a 0.2 para que sea visible pero tenue
+    zIndex: isDragging ? 999 : "auto",
+    position: isDragging ? "relative" : ("static" as any),
+    backgroundColor: isDragging ? "#f3f4f6" : "white",
+    boxShadow: isDragging
+      ? "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
+      : isSortableDragging
+        ? "none"
+        : "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+  }
 
   return (
     <div
@@ -26,23 +46,18 @@ export default function Task ({task}: TaskProps){
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-white p-3 rounded-md shadow-sm cursor-grab active:cursor-grabbing mb-2 hover:shadow-md transition-shadow"
+      className={`
+        p-3 mb-2 bg-white rounded-md border border-gray-200 cursor-grab
+        ${isDragging ? "scale-105" : ""}
+        ${isSortableDragging ? "opacity-20" : ""}
+        transition-all duration-200 ease-in-out
+      `}
     >
-      <h4 className="font-medium">{task.title}</h4>
-      <div className="flex justify-between text-xs text-gray-500 mt-2">
-        <span>{new Date(task.createdAt).toLocaleDateString()}</span>
-        <span className={`px-2 py-1 rounded-full ${
-          task.status === "todo" ? "bg-gray-100" : 
-          task.status === "in-progress" ? "bg-blue-100 text-blue-800" : 
-          "bg-green-100 text-green-800"
-        }`}>
-          {task.status}
-        </span>
-      </div>
-      <div className="mt-2 text-xs text-gray-400">
-        Arrastra para reordenar
-      </div>
+      <h3 className="font-medium">{task.title}</h3>
+      <p className="text-xs text-gray-500 mt-1">{new Date(task.createdAt).toLocaleDateString()}</p>
     </div>
-  );
-};
+  )
+}
+
+export default Task
 

@@ -1,115 +1,112 @@
-import { useState } from "react";
-import { Points } from "../Icons";
-import Task from "../Task";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  arrayMove
-} from "@dnd-kit/sortable";
+"use client"
+
+import { useState } from "react"
+import { useDroppable } from "@dnd-kit/core"
+import { Points } from "../Icons"
+import Task from "../Task"
 
 
 export interface TaskType {
-  id: `${string}-${string}-${string}-${string}-${string}`;
-  title: string;
-  status: "todo" | "in-progress" | "done";
-  createdAt: number;
+  id: `${string}-${string}-${string}-${string}-${string}`
+  title: string
+  status: "todo" | "in-progress" | "done"
+  createdAt: number
 }
 
-export default function Board() {
-  const [tasks, setTasks] = useState<TaskType[]>([]);
-  const [taskTitle, setTaskTitle] = useState<string>("");
+interface BoardProps {
+  id: string
+  title: string
+  tasks: TaskType[]
+  onAddTask: (title: string) => void
+  activeTaskId: string | null
+  isOver?: boolean
+}
 
-  // Configuración de sensores para dnd-kit
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+export default function Board({ id, title, tasks, onAddTask, activeTaskId, isOver: isColumnOver = false }: BoardProps) {
+  const [taskTitle, setTaskTitle] = useState<string>("")
+  const [isInputFocused, setIsInputFocused] = useState(false)
 
-  const addTask = () => {
-    if (!taskTitle.trim()) return;
+  // Mejoramos el droppable para mejor feedback visual
+  const { setNodeRef, isOver } = useDroppable({
+    id,
+    data: {
+      type: "board",
+      accepts: ["task"],
+    },
+  })
 
-    const newTask: TaskType = {
-      id: crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`,
-      title: taskTitle,
-      status: "todo",
-      createdAt: Date.now(),
-    };
-    setTasks((prevTasks) => [...prevTasks, newTask]);
-    setTaskTitle("");
-  };
-
-  // Manejador para cuando termina el arrastre
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (!over) return;
-    
-    if (active.id !== over.id) {
-      setTasks((tasks) => {
-        const oldIndex = tasks.findIndex((task) => task.id === active.id);
-        const newIndex = tasks.findIndex((task) => task.id === over.id);
-        
-        return arrayMove(tasks, oldIndex, newIndex);
-      });
-    }
-  };
+  const handleAddTask = () => {
+    onAddTask(taskTitle)
+    setTaskTitle("")
+  }
 
   return (
-    <section className="flex justify-around gap-6 overflow-x-hidden">
-      <div className="bg-black/10 rounded-xl min-h-[800px] w-[300px] p-4 flex flex-col h-full shadow-md">
-        <div className="flex justify-between mb-3">
-          <h3 className="text-lg font-semibold ">Board 1</h3>
-          <button className="hover:bg-black/20 px-2 rounded-md transition-all duration-500">
-            <Points />
-          </button>
-        </div>
-        <div className="flex flex-col flex-1 gap-2 overflow-y-auto p-2 overflow-x-hidden">
-          <DndContext 
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={tasks.map(task => task.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {tasks.map((task) => (
-                <Task key={task.id} task={task} />
-              ))}
-            </SortableContext>
-          </DndContext>
-        </div>
-        <form
-          className="pt-4 border-t border-black/10 mt-2 px-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            addTask();
-          }}
-        >
-          <input
-            onChange={(e) => setTaskTitle(e.target.value)}
-            value={taskTitle}
-            placeholder="Create, update task..."
-            type="text"
-            className="w-full p-2 rounded-md border border-gray-300 mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-          <button className="w-full bg-primary text-primary-foreground rounded-md py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
-            Add Task
-          </button>
-        </form>
+    <div
+      ref={setNodeRef}
+      className={`
+        bg-white rounded-xl min-h-[600px] w-[300px] p-4 flex flex-col shadow-md
+        ${isOver ? "ring-2 ring-primary/70 bg-gray-50 scale-[1.02]" : ""}
+        ${isColumnOver ? "ring-2 ring-primary/50 bg-gray-50/50" : ""}
+        ${isInputFocused ? "ring-1 ring-primary/30" : ""}
+        transition-all duration-200 ease-in-out
+      `}
+    >
+      <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+        <h3 className="text-lg font-semibold">
+          {title}
+          <span className="ml-2 text-sm font-normal text-gray-500">({tasks.length})</span>
+        </h3>
+        <button className="hover:bg-gray-100 p-1 rounded-md transition-all duration-300">
+          <Points />
+        </button>
       </div>
-    </section>
-  );
+
+      <div
+        className={`
+        flex-1 rounded-md transition-colors duration-300 ease-in-out
+        ${isOver && tasks.length === 0 ? "bg-primary/5 border-2 border-dashed border-primary/20" : ""}
+        ${isOver ? "pt-2 pb-2" : ""}
+      `}
+      >
+        {tasks.length > 0 ? (
+          <div className="space-y-2 mb-2">
+            {tasks.map((task) => (
+              <Task key={task.id} task={task} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-16 text-sm text-gray-400 italic">
+            {isOver ? "Drop here" : "No tasks yet"}
+          </div>
+        )}
+      </div>
+
+      <form
+        className="pt-3 border-t border-gray-100 mt-3"
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleAddTask()
+        }}
+      >
+        <input
+          onChange={(e) => setTaskTitle(e.target.value)}
+          value={taskTitle}
+          placeholder="Add a new task..."
+          type="text"
+          className="w-full p-2 rounded-md border border-gray-200 mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow duration-200"
+          onFocus={() => setIsInputFocused(true)}
+          onBlur={() => setIsInputFocused(false)}
+        />
+        <button
+          type="submit"
+          disabled={!taskTitle.trim()}
+          className="w-full bg-primary text-primary-foreground rounded-md py-2 text-sm font-medium 
+            hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Add Task
+        </button>
+      </form>
+    </div>
+  )
 }
+
