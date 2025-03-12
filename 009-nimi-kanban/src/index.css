@@ -5,3 +5,19 @@
 button:hover {
   cursor: pointer;
 }
+
+button:disabled:hover {
+  cursor: not-allowed;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}

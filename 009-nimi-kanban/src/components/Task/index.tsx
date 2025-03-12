@@ -28,11 +28,10 @@ const Task: React.FC<TaskProps> = ({ task, isDragging = false }) => {
   // Mejoramos los estilos para una mejor experiencia visual
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition: transition || "transform 200ms ease, opacity 200ms ease",
+    transition: transition || "transform 50ms ease, opacity 50ms ease",
     opacity: isSortableDragging ? 0.2 : 1, // Cambiamos a 0.2 para que sea visible pero tenue
     zIndex: isDragging ? 999 : "auto",
     position: isDragging ? "relative" : ("static" as any),
-    backgroundColor: isDragging ? "#f3f4f6" : "white",
     boxShadow: isDragging
       ? "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
       : isSortableDragging
@@ -47,14 +46,13 @@ const Task: React.FC<TaskProps> = ({ task, isDragging = false }) => {
       {...attributes}
       {...listeners}
       className={`
-        p-3 mb-2 bg-white rounded-md border border-gray-200 cursor-grab
-        ${isDragging ? "scale-105" : ""}
+        p-3 mb-2 bg-white dark:bg-neutral-500 rounded-md border border-gray-200 cursor-grab
+        ${isDragging ? "scale-105 cursor-grabbing" : ""}
         ${isSortableDragging ? "opacity-20" : ""}
-        transition-all duration-200 ease-in-out
       `}
     >
       <h3 className="font-medium">{task.title}</h3>
-      <p className="text-xs text-gray-500 mt-1">{new Date(task.createdAt).toLocaleDateString()}</p>
+      <p className="text-xs dark:text-white/50 text-gray-500 mt-1">{new Date(task.createdAt).toLocaleDateString()}</p>
     </div>
   )
 }

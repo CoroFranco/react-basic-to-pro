@@ -19,19 +19,20 @@ import { useState } from "react"
 import { KeyboardSensor } from "@dnd-kit/core"
 import Board from "../../components/Board"
 import Task from "../../components/Task"
+import AddBoard from "../../components/AddBoard"
 
 type TaskType = {
   id: `${string}-${string}-${string}-${string}-${string}`
   title: string
-  status: "todo" | "in-progress" | "done"
+  status: string
   createdAt: number
 }
 
+type BoardType = { id: string, title: string }
+
 export default function Home() {
-  const [boards, setBoards] = useState([
-    { id: "board-1", title: "To Do" },
-    { id: "board-2", title: "In Progress" },
-    { id: "board-3", title: "Done" },
+  const [boards, setBoards] = useState<BoardType[]>([
+    { id: "board-1", title: "To Do" }
   ])
 
   const [tasks, setTasks] = useState<TaskType[]>([])
@@ -206,9 +207,6 @@ export default function Home() {
       // Si el status es diferente, actualizamos la tarea
       if (activeTask.status !== status) {
         setTasks((tasks) => {
-          // Encontramos todas las tareas en el tablero de destino
-          const tasksInTargetBoard = tasks.filter((t) => t.status === status)
-
           // Creamos una nueva lista sin la tarea activa
           const tasksWithoutActive = tasks.filter((t) => t.id !== activeId)
 
@@ -229,31 +227,43 @@ export default function Home() {
   }
 
   // Helper para obtener el status a partir del ID del tablero
-  const getBoardStatus = (boardId: string): "todo" | "in-progress" | "done" => {
-    switch (boardId) {
-      case "board-1":
-        return "todo"
-      case "board-2":
-        return "in-progress"
-      case "board-3":
-        return "done"
-      default:
-        return "todo"
-    }
+  const getBoardStatus = (boardId: string): string => {
+    // Buscamos el tablero por su ID
+    const board = boards.find(b => b.id === boardId);
+    
+    // Si no se encuentra el tablero, devolvemos 'todo' como valor predeterminado
+    if (!board) return "todo";
+    
+    // Extraemos el índice del tablero (el número después de 'board-')
+    const boardIndex = parseInt(boardId.split('-')[1]);
+    
+    // Los primeros 3 tableros mantienen sus status predeterminados
+    if (boardIndex === 1) return "todo";
+    if (boardIndex === 2) return "in-progress";
+    if (boardIndex === 3) return "done";
+    
+    // Para tableros adicionales, creamos un status basado en su título
+    // Convertimos el título a minúsculas y reemplazamos espacios con guiones
+    return board.title.toLowerCase().replace(/\s+/g, '-');
   }
 
   // Helper para obtener el ID del tablero a partir del status
-  const getBoardIdFromStatus = (status: "todo" | "in-progress" | "done"): string => {
-    switch (status) {
-      case "todo":
-        return "board-1"
-      case "in-progress":
-        return "board-2"
-      case "done":
-        return "board-3"
-      default:
-        return "board-1"
-    }
+  const getBoardIdFromStatus = (status: string): string => {
+    // Para los estados predeterminados, usamos los IDs fijos
+    if (status === "todo") return "board-1";
+    if (status === "in-progress") return "board-2";
+    if (status === "done") return "board-3";
+    
+    // Para estados personalizados, buscamos el tablero correspondiente
+    const board = boards.find(b => 
+      b.title.toLowerCase().replace(/\s+/g, '-') === status
+    );
+    
+    // Si encontramos el tablero, devolvemos su ID
+    if (board) return board.id;
+    
+    // Si no encontramos un tablero, devolvemos el tablero "To Do" por defecto
+    return "board-1";
   }
 
   // Añadir una nueva tarea a un tablero específico
@@ -270,6 +280,49 @@ export default function Home() {
     setTasks((prevTasks) => [...prevTasks, newTask])
   }
 
+  const handleUpdateColumnTitle = (boardId: string, newTitle: string) => {
+    setBoards(boards.map(board => 
+      board.id === boardId ? { ...board, title: newTitle } : board
+    ));
+  };
+
+  // Función completa para añadir un nuevo tablero
+  const addBoard = (title: string) => {
+    if (!title.trim()) return;
+    
+    // Crear un nuevo ID para el tablero
+    const newBoardId = `board-${boards.length + 1}`;
+    
+    // Crear un nuevo tablero
+    const newBoard: BoardType = {
+      id: newBoardId,
+      title: title
+    };
+    
+    // Actualizar los tableros
+    setBoards(prevBoards => [...prevBoards, newBoard]);
+  }
+
+  // Función para eliminar un tablero
+  const deleteBoard = (boardId: string) => {
+    // Verificar si el tablero tiene tareas
+    const boardTasks = tasks.filter(task => getBoardIdFromStatus(task.status) === boardId);
+    
+    // Si el tablero tiene tareas, moverlas al tablero "To Do"
+    if (boardTasks.length > 0) {
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          getBoardIdFromStatus(task.status) === boardId 
+            ? { ...task, status: "todo" } 
+            : task
+        )
+      );
+    }
+    
+    // Eliminar el tablero
+    setBoards(prevBoards => prevBoards.filter(board => board.id !== boardId));
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -278,17 +331,15 @@ export default function Home() {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-[calc(100vh-64px)]  dark:text-white text-[#222]">
         <h1 className="pt-[90px] text-3xl font-bold text-center mb-8">Kanban Board</h1>
-
-        <div className="flex justify-center gap-6 px-4 pb-10">
+        <div className="flex gap-10">
+        <div className="flex gap-6 px-4 pb-10 overflow-x-scroll dark:bg-neutral-700 bg-gray-100 p-6 rounded-xl">
           {boards.map((board) => {
             // Filtramos las tareas para este tablero
             const boardTasks = tasks.filter((task) => {
-              if (board.id === "board-1") return task.status === "todo"
-              if (board.id === "board-2") return task.status === "in-progress"
-              if (board.id === "board-3") return task.status === "done"
-              return false
+              const boardStatus = getBoardStatus(board.id);
+              return task.status === boardStatus;
             })
 
             return (
@@ -298,17 +349,22 @@ export default function Home() {
                 strategy={verticalListSortingStrategy}
               >
                 <Board
+                  onUpdateTitle={handleUpdateColumnTitle}
                   id={board.id}
                   title={board.title}
                   tasks={boardTasks}
                   onAddTask={(title) => addTask(title, board.id)}
                   activeTaskId={activeTaskId}
                   isOver={currentContainer === board.id && sourceContainer !== board.id}
+                  onDeleteBoard={boards.length > 1 ? () => deleteBoard(board.id) : undefined}
                 />
               </SortableContext>
             )
           })}
         </div>
+          <AddBoard onAddBoard={addBoard}/>
+        </div>
+        
 
         {/* DragOverlay mejorado para animaciones más suaves */}
         <DragOverlay
@@ -323,4 +379,3 @@ export default function Home() {
     </DndContext>
   )
 }
-

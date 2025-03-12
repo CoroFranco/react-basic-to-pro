@@ -1,6 +1,10 @@
 import { NavLink } from "react-router-dom";
 import {Arrows} from "../Icons";
-const NavElements = ['Dashboard', 'Boards', 'Teams', 'Configuration']
+const NavElements = [
+  {name:'Dashboard', path: '/'}, 
+  {name:'Boards', path: '/boards'}, 
+  {name:'Teams', path: '/teams'}, 
+  {name: 'Configuration', path: '/config'}]
 
 function NavBar () {
   return (
@@ -19,11 +23,11 @@ function NavBar () {
           {
             NavElements.map((tab, index) => (
               <li key={index} className="hover:opacity-80 cursor-pointer">
-                <NavLink to='/' className={({ isActive }) =>
+                <NavLink to={tab.path} className={({ isActive }) =>
                 isActive
                   ? "border-b-1 "
                   : ""
-              }>{tab}</NavLink>              
+              }>{tab.name}</NavLink>              
               </li>
             ))
           }
