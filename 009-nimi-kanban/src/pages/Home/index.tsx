@@ -331,40 +331,49 @@ export default function Home() {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <main className="min-h-[calc(100vh-64px)]  dark:text-white text-[#222]">
-        <h1 className="pt-[90px] text-3xl font-bold text-center mb-8">Kanban Board</h1>
-        <div className="flex gap-10">
-        <div className="flex gap-6 px-4 pb-10 overflow-x-scroll dark:bg-neutral-700 bg-gray-100 p-6 rounded-xl">
-          {boards.map((board) => {
-            // Filtramos las tareas para este tablero
-            const boardTasks = tasks.filter((task) => {
-              const boardStatus = getBoardStatus(board.id);
-              return task.status === boardStatus;
-            })
-
-            return (
-              <SortableContext
-                key={board.id}
-                items={boardTasks.map((task) => task.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <Board
-                  onUpdateTitle={handleUpdateColumnTitle}
-                  id={board.id}
-                  title={board.title}
-                  tasks={boardTasks}
-                  onAddTask={(title) => addTask(title, board.id)}
-                  activeTaskId={activeTaskId}
-                  isOver={currentContainer === board.id && sourceContainer !== board.id}
-                  onDeleteBoard={boards.length > 1 ? () => deleteBoard(board.id) : undefined}
-                />
-              </SortableContext>
-            )
-          })}
-        </div>
-          <AddBoard onAddBoard={addBoard}/>
-        </div>
+      <main className="min-h-[calc(100vh-64px)] dark:text-white text-gray-800 transition-colors duration-300 ease-in-out">
+        <h1 className="pt-16 md:pt-20 text-3xl font-bold text-center mb-10 dark:text-white text-gray-800">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-800 dark:from-purple-200 dark:to-blue-600">
+            Kanban Board
+          </span>
+        </h1>
         
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10 px-4 md:px-8 max-w-[1400px] mx-auto">
+          <div className="flex-1 overflow-x-auto p-6">
+            <div className="flex gap-6 min-w-max pb-4">
+              {boards.map((board) => {
+                // Filtramos las tareas para este tablero
+                const boardTasks = tasks.filter((task) => {
+                  const boardStatus = getBoardStatus(board.id);
+                  return task.status === boardStatus;
+                })
+
+                return (
+                  <SortableContext
+                    key={board.id}
+                    items={boardTasks.map((task) => task.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <Board
+                      onUpdateTitle={handleUpdateColumnTitle}
+                      id={board.id}
+                      title={board.title}
+                      tasks={boardTasks}
+                      onAddTask={(title) => addTask(title, board.id)}
+                      activeTaskId={activeTaskId}
+                      isOver={currentContainer === board.id && sourceContainer !== board.id}
+                      onDeleteBoard={boards.length > 1 ? () => deleteBoard(board.id) : undefined}
+                    />
+                  </SortableContext>
+                )
+              })}
+            </div>
+          </div>
+          
+          <div className="md:w-64 mb-6 md:mb-0">
+            <AddBoard onAddBoard={addBoard}/>
+          </div>
+        </div>
 
         {/* DragOverlay mejorado para animaciones más suaves */}
         <DragOverlay
