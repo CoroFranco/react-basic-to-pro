@@ -333,7 +333,7 @@ export default function Home() {
     >
       <main className="min-h-[calc(100vh-64px)] dark:text-white text-gray-800 transition-colors duration-300 ease-in-out">
         <h1 className="pt-16 md:pt-20 text-3xl font-bold text-center mb-10 dark:text-white text-gray-800">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-800 dark:from-purple-200 dark:to-blue-600">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-900 to-blue-800 dark:from-purple-700 dark:to-blue-500">
             Kanban Board
           </span>
         </h1>
